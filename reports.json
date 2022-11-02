@@ -1,12 +1,12 @@
 {
   "name": "Connect Reports",
-  "readme_file": "readme.md",
+  "readme_file": "README.md",
   "version": "1.0.0",
   "language": "python",
   "reports": [
     {
       "name": "Fulfillment requests with parameters",
-      "readme_file": "reports/parameterreport/README.md",
+      "readme_file": "reports/parameterreport/readme.md",
       "entrypoint": "reports.parameterreport.entrypoint.generate",
       "audience": [
         "provider",
