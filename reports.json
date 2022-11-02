@@ -6,7 +6,7 @@
   "reports": [
     {
       "name": "Fulfillment requests with parameters",
-      "readme_file": "reports/parameterreport/readme.md",
+      "readme_file": "reports/parameterreport/README.md",
       "entrypoint": "reports.parameterreport.entrypoint.generate",
       "audience": [
         "provider",
