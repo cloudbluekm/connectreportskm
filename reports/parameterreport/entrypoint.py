@@ -40,9 +40,8 @@ def generate(
     for request in requests:
         connection = request['asset']['connection']
         assetparams = ''
-        if request['asset']['params'] != null:
-            for param in request['asset']['params']:
-                assetparams += param['value']+", "
+        param in request['asset']['params']:
+            assetparams += param['value']+", "
                 
         for item in request['asset']['items']:
             if item['quantity'] != 0 and item['old_quantity'] != 0:
