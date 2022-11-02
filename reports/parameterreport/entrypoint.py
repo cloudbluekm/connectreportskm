@@ -75,7 +75,7 @@ def _get_requests(client, parameters):
     return client.requests.filter(query).all()
 
 
-def _process_line(item, request, connection):
+def _process_line(item, request, connection, params):
     return (
         get_basic_value(request, 'id'),
         get_basic_value(request, 'type'),
