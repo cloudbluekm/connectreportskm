@@ -39,10 +39,10 @@ def generate(
 
     for request in requests:
         connection = request['asset']['connection']
-        params = ''
+        assetparams = ''
         if request['asset']['params'] != null:
             for param in request['asset']['params']:
-                params = params+str(param['value'])+", "
+                assetparams += param['value']+", "
                 
         for item in request['asset']['items']:
             if item['quantity'] != 0 and item['old_quantity'] != 0:
@@ -52,7 +52,7 @@ def generate(
                         for idx, value in enumerate(_process_line(item, request, connection, params))
                     }
                 else:
-                    yield _process_line(item, request, connection, params)
+                    yield _process_line(item, request, connection, assetparams)
         progress += 1
         progress_callback(progress, total)
 
@@ -118,5 +118,5 @@ def _process_line(item, request, connection, params):
         get_value(request['asset'], 'connection', 'type'),
         get_value(connection, 'hub', 'id') if 'hub' in connection else '',
         get_value(connection, 'hub', 'name') if 'hub' in connection else '',
-        params,
+        assetparams,
     )
