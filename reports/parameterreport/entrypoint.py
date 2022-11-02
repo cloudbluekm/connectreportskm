@@ -39,7 +39,11 @@ def generate(
 
     for request in requests:
         connection = request['asset']['connection']
-        params = request['asset']['params']
+        params = ''
+        if request['asset']['params'] != null:
+            for param in request['asset']['params']:
+                params = params+str(param['value'])+", "
+                
         for item in request['asset']['items']:
             if item['quantity'] != 0 and item['old_quantity'] != 0:
                 if renderer_type == 'json':
@@ -114,5 +118,5 @@ def _process_line(item, request, connection, params):
         get_value(request['asset'], 'connection', 'type'),
         get_value(connection, 'hub', 'id') if 'hub' in connection else '',
         get_value(connection, 'hub', 'name') if 'hub' in connection else '',
-        get_value(request, 'asset', 'params'),
+        params,
     )
