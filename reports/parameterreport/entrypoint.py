@@ -48,7 +48,7 @@ def generate(
                 if renderer_type == 'json':
                     yield {
                         HEADERS[idx].replace(' ', '_').lower(): value
-                        for idx, value in enumerate(_process_line(item, request, connection, params))
+                        for idx, value in enumerate(_process_line(item, request, connection, assetparams))
                     }
                 else:
                     yield _process_line(item, request, connection, assetparams)
