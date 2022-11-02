@@ -39,6 +39,7 @@ def generate(
 
     for request in requests:
         connection = request['asset']['connection']
+        params = request['asset']['params']
         for item in request['asset']['items']:
             if item['quantity'] != 0 and item['old_quantity'] != 0:
                 if renderer_type == 'json':
