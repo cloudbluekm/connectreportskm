@@ -11,7 +11,7 @@ from ..utils import convert_to_datetime, get_basic_value, get_value, today_str
 HEADERS = (
     'Request ID', 'Request Type',
     'Created At', 'Updated At', 'Exported At',
-    'Customer ID', 'Customer Name', 'Customer External ID',
+    'Customer ID', 'Customer Name', 'Customer External ID','Customer Address (line 1)',
     'Tier 1 ID', 'Tier 1 Name', 'Tier 1 External ID',
     'Tier 2 ID', 'Tier 2 Name', 'Tier 2 External ID',
     'Provider ID', 'Provider Name', 'Vendor ID', 'Vendor Name',
