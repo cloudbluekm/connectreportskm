@@ -5,7 +5,7 @@
   "language": "python",
   "reports": [
     {
-      "name": "Fulfillment requests with parameters",
+      "name": "Fulfillment requests with parameters/item summary",
       "readme_file": "reports/parameterreport/readme.md",
       "entrypoint": "reports.parameterreport.entrypoint.generate",
       "audience": [
