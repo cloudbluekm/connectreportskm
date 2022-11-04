@@ -30,7 +30,7 @@ def generate(
 ):
     requests = _get_requests(client, parameters)
     total = requests.count()
-    paramcount = requests['asset']['params'].count()
+    
     progress = 0
     if renderer_type == 'csv':
         yield HEADERS
@@ -39,6 +39,7 @@ def generate(
         progress_callback(progress, total)
 
     for request in requests:
+            paramcount = request['asset']['params'].count()
             connection = request['asset']['connection']
             for item in request['asset']['items']:
                 if item['quantity'] != 0 and item['old_quantity'] != 0:
@@ -133,7 +134,7 @@ def _process_line(item, request, connection):
             while paramcount > 0:
                 get_value(request,['asset']['params'], paramcount,'id')
                 get_value(request,['asset']['params'], paramcount,'value')
-                paramcount-=1
+                paramcount -= 1
                                  
         #get_value(request, 'params')
     )
