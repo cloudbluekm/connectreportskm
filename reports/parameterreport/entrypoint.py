@@ -132,8 +132,8 @@ def _process_line(item, request, connection, paramcount):
         get_value(request, 'asset', 'status'),
         if paramcount > 0:
             while paramcount > 0:
-                get_value(request,['asset']['params'], paramcount,'id')
-                get_value(request,['asset']['params'], paramcount,'value')
+                get_value(request['asset']['params'], paramcount,'id')
+                get_value(request['asset']['params'], paramcount,'value')
                 paramcount -= 1
                                  
         #get_value(request, 'params')
