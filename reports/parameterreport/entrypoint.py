@@ -11,26 +11,26 @@ from ..utils import convert_to_datetime, get_basic_value, get_value, today_str
 HEADERS = (
     'Request ID', 'Request Type',
     'Created At', 'Updated At', 'Exported At',
-    'Item ID', 'Item Name', 'Item Type', 'Item Unit Of measure', 'Item MPN', 'Item Period',
-    'Quantity', 'Customer ID', 'Customer Name', 'Customer External ID',
+    'Customer ID', 'Customer Name', 'Customer External ID',
     'Tier 1 ID', 'Tier 1 Name', 'Tier 1 External ID',
     'Tier 2 ID', 'Tier 2 Name', 'Tier 2 External ID',
     'Provider ID', 'Provider Name', 'Vendor ID', 'Vendor Name',
     'Product ID', 'Product Name', 'Asset ID', 'Asset External ID',
     'Transaction Type', 'Hub ID', 'Hub Name', 'Request Status',
+    'Request Items', 'Request Parameters'
 )
 
 
 def generate(
-    client=None,
-    parameters=None,
-    progress_callback=None,
-    renderer_type=None,
-    extra_context_callback=None,
+        client=None,
+        parameters=None,
+        progress_callback=None,
+        renderer_type=None,
+        extra_context_callback=None,
 ):
     requests = _get_requests(client, parameters)
     total = requests.count()
-    
+
     progress = 0
     if renderer_type == 'csv':
         yield HEADERS
@@ -39,33 +39,18 @@ def generate(
         progress_callback(progress, total)
 
     for request in requests:
-            paramcount = request['asset']['params'].count()
-            connection = request['asset']['connection']
-            for item in request['asset']['items']:
-                if item['quantity'] != 0 and item['old_quantity'] != 0:
-                    if renderer_type == 'json':
-                        yield {
-                           HEADERS[idx].replace(' ', '_').lower(): value
-                            for idx, value in enumerate(_process_line(item, request, connection, paramcount))
-                        }
-                    else:
-                        yield _process_line(item, request, connection, paramcount)
-            progress += 1
-            progress_callback(progress, total)
-        
-    #for request in requests:
-    #    connection = request['asset']['connection']
-    #    for item in request['asset']['params']:
-    #        if item['phase'] != 'fulfillment':
-    #            if renderer_type == 'json':
-    #                yield {
-    #                    HEADERS[idx].replace(' ', '_').lower(): value
-    #                    for idx, value in enumerate(_process_line(item, request, connection))
-    #               }
-    #            else:
-    #                yield _process_line(item, request, connection)
-    #    progress += 1
-    #    progress_callback(progress, total)
+        connection = request['asset']['connection']
+        for item in request['asset']['items']:
+            if item['quantity'] != 0 and item['old_quantity'] != 0:
+                if renderer_type == 'json':
+                    yield {
+                        HEADERS[idx].replace(' ', '_').lower(): value
+                        for idx, value in enumerate(_process_line(request, connection))
+                    }
+                else:
+                    yield _process_line(request, connection)
+        progress += 1
+        progress_callback(progress, total)
 
 
 def _get_requests(client, parameters):
@@ -91,7 +76,22 @@ def _get_requests(client, parameters):
     return client.requests.filter(query).all()
 
 
-def _process_line(item, request, connection, paramcount):
+def _process_line(request, connection):
+    # Create string of request items with non-zero quantity
+    request_items = request['asset']['items']
+    items_string = ''
+    while request_items:
+        item = request_items.pop(0)
+        if float(item['quantity']) != 0 or float(item['old_quantity']) != 0:
+            items_string += f"{item['global_id']} - {item['mpn']} - '{item['display_name']}' - {item['quantity']} ({item['old_quantity']}) - {item['type']} - {item['period']}\n"
+
+    # Create string of param_id - param_value separated by newline
+    request_params = request['asset']['params']
+    params_string = ''
+    while request_params:
+        param = request_params.pop(0)
+        params_string += f"{param['id']} - {param['value']}\n"
+
     return (
         get_basic_value(request, 'id'),
         get_basic_value(request, 'type'),
@@ -102,13 +102,6 @@ def _process_line(item, request, connection, paramcount):
             get_basic_value(request, 'updated'),
         ),
         today_str(),
-        get_basic_value(item, 'id'),
-        get_basic_value(item, 'name'),
-        get_basic_value(item, 'title'),
-        get_basic_value(item, 'value'),
-        get_basic_value(item, 'description'),
-        get_basic_value(item, 'type'),
-        get_basic_value(item, 'phase'),
         get_value(request['asset']['tiers'], 'customer', 'id'),
         get_value(request['asset']['tiers'], 'customer', 'name'),
         get_value(request['asset']['tiers'], 'customer', 'external_id'),
@@ -130,11 +123,7 @@ def _process_line(item, request, connection, paramcount):
         get_value(connection, 'hub', 'id') if 'hub' in connection else '',
         get_value(connection, 'hub', 'name') if 'hub' in connection else '',
         get_value(request, 'asset', 'status'),
-        if paramcount > 0:
-            while paramcount > 0:
-                get_value(request['asset']['params'], paramcount,'id')
-                get_value(request['asset']['params'], paramcount,'value')
-                paramcount -= 1
-                                 
-        #get_value(request, 'params')
+        items_string.rstrip(),
+        params_string.rstrip()
     )
+
