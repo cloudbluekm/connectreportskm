@@ -90,7 +90,8 @@ def _process_line(request, connection):
     params_string = ''
     while request_params:
         param = request_params.pop(0)
-        params_string += f"{param['id']} - {param['value']}\n"
+        if param['value'] != '':
+            params_string += f"{param['id']} - {param['value']}\n"
 
     return (
         get_basic_value(request, 'id'),
@@ -105,6 +106,7 @@ def _process_line(request, connection):
         get_value(request['asset']['tiers'], 'customer', 'id'),
         get_value(request['asset']['tiers'], 'customer', 'name'),
         get_value(request['asset']['tiers'], 'customer', 'external_id'),
+        get_value(request['asset']['tiers']['customer'], 'contact_info', 'address_line1'),
         get_value(request['asset']['tiers'], 'tier1', 'id'),
         get_value(request['asset']['tiers'], 'tier1', 'name'),
         get_value(request['asset']['tiers'], 'tier1', 'external_id'),
