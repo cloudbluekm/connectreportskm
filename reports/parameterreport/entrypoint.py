@@ -30,6 +30,7 @@ def generate(
 ):
     requests = _get_requests(client, parameters)
     total = requests.count()
+    paramcount = requests['asset']['params'].count()
     progress = 0
     if renderer_type == 'csv':
         yield HEADERS
@@ -38,22 +39,32 @@ def generate(
         progress_callback(progress, total)
 
     for request in requests:
-        connection = request['asset']['connection']
-        assetparams = ''
-        param in request['asset']['params']:
-            assetparams += param['value']+", "
-                
-        for item in request['asset']['items']:
-            if item['quantity'] != 0 and item['old_quantity'] != 0:
-                if renderer_type == 'json':
-                    yield {
-                        HEADERS[idx].replace(' ', '_').lower(): value
-                        for idx, value in enumerate(_process_line(item, request, connection, assetparams))
-                    }
-                else:
-                    yield _process_line(item, request, connection, assetparams)
-        progress += 1
-        progress_callback(progress, total)
+            connection = request['asset']['connection']
+            for item in request['asset']['items']:
+                if item['quantity'] != 0 and item['old_quantity'] != 0:
+                    if renderer_type == 'json':
+                        yield {
+                           HEADERS[idx].replace(' ', '_').lower(): value
+                            for idx, value in enumerate(_process_line(item, request, connection, paramcount))
+                        }
+                    else:
+                        yield _process_line(item, request, connection, paramcount)
+            progress += 1
+            progress_callback(progress, total)
+        
+    #for request in requests:
+    #    connection = request['asset']['connection']
+    #    for item in request['asset']['params']:
+    #        if item['phase'] != 'fulfillment':
+    #            if renderer_type == 'json':
+    #                yield {
+    #                    HEADERS[idx].replace(' ', '_').lower(): value
+    #                    for idx, value in enumerate(_process_line(item, request, connection))
+    #               }
+    #            else:
+    #                yield _process_line(item, request, connection)
+    #    progress += 1
+    #    progress_callback(progress, total)
 
 
 def _get_requests(client, parameters):
@@ -79,7 +90,7 @@ def _get_requests(client, parameters):
     return client.requests.filter(query).all()
 
 
-def _process_line(item, request, connection, params):
+def _process_line(item, request, connection):
     return (
         get_basic_value(request, 'id'),
         get_basic_value(request, 'type'),
@@ -90,13 +101,13 @@ def _process_line(item, request, connection, params):
             get_basic_value(request, 'updated'),
         ),
         today_str(),
-        get_basic_value(item, 'global_id'),
-        get_basic_value(item, 'display_name'),
-        get_basic_value(item, 'item_type'),
+        get_basic_value(item, 'id'),
+        get_basic_value(item, 'name'),
+        get_basic_value(item, 'title'),
+        get_basic_value(item, 'value'),
+        get_basic_value(item, 'description'),
         get_basic_value(item, 'type'),
-        get_basic_value(item, 'mpn'),
-        get_basic_value(item, 'period'),
-        get_basic_value(item, 'quantity'),
+        get_basic_value(item, 'phase'),
         get_value(request['asset']['tiers'], 'customer', 'id'),
         get_value(request['asset']['tiers'], 'customer', 'name'),
         get_value(request['asset']['tiers'], 'customer', 'external_id'),
@@ -117,5 +128,12 @@ def _process_line(item, request, connection, params):
         get_value(request['asset'], 'connection', 'type'),
         get_value(connection, 'hub', 'id') if 'hub' in connection else '',
         get_value(connection, 'hub', 'name') if 'hub' in connection else '',
-        assetparams,
+        get_value(request, 'asset', 'status'),
+        if paramcount > 0:
+            while paramcount > 0:
+                get_value(request,['asset']['params'], paramcount,'id')
+                get_value(request,['asset']['params'], paramcount,'value')
+                paramcount-=1
+                                 
+        #get_value(request, 'params')
     )
